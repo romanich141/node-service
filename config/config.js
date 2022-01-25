@@ -5,7 +5,7 @@ module.exports = {
     // ssl: process.env.SSL,
     // port: process.env.PROXY_PORT,
     on: {
-        connect: 'connect',
+        connection: 'connection',
         auth: 'auth',
         logout: 'logout',
         disconnect: 'disconnect'
