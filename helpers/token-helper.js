@@ -1,6 +1,7 @@
 // https://www.npmjs.com/package/jsonwebtoken
-const jwt = require('jsonwebtoken');
 require('dotenv').config();
+
+const jwt = require('jsonwebtoken');
 
 const verifyToken = (token) => {
     const checkExpireToken = (exp) => {
@@ -17,4 +18,6 @@ const verifyToken = (token) => {
     })
 }
 
-module.exports = verifyToken;
+module.exports = { 
+    verifyToken, 
+};
