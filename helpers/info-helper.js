@@ -1,6 +1,9 @@
 const conf = require('../config/config.js');
 
-const info = (socket, message) => {
+const info = ({ 
+    socket, 
+    message, 
+}) => {
     try {
         socket.emit(conf.emit.info, message);
     } catch (err) {
