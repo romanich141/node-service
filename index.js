@@ -1,72 +1,70 @@
 require('dotenv').config();
-
+const { Server } = require("socket.io");
 const http = require('http');
 const express = require('express');
-const socketio = require('socket.io');
 const { verifyToken } = require('./helpers/token-helper.js');
 const sendInfo = require('./helpers/info-helper.js')
 const config = require('./config/config.js')
 const messages = require('./messages/index.js');
-
-const { addUserSocketIdToRoom, removeUserSocketIdFromRoom, getRooms, removeRoom } = require("./rooms.js");
-
 const app = express();
 const server = http.createServer(app);
-const io = socketio(server);
 
 const PORT = process.env.NODE_PORT;
 
-// run when new user connected
+// options socket server
+const options = {
+    transports: ["websocket"]
+};
+
+const io = new Server(server, options);
+
+// run when new user is connected
 io.on(config.on.connection, (socket) => {
     console.log("New connection", socket.id);
 
-    let uid = null;
+    let room = null;
     let token = null;
 
     socket.on(config.on.test, data => {
-        console.log({ data });
+        // console.log({ data });
 
-        sendInfo(socket, data);
+        sendInfo({ socket, message: data });
     })
 
     // run when user is auth
     socket.on(config.on.auth, (data) => {
         token = data.token;
-        uid = data.uid;
-       
-        let sendMsg = messages.wrong_auth;
+        room = data.room;
+
+        let message = messages.wrong_auth;
 
         if (token && verifyToken(token)) {
-            addUserSocketIdToRoom(socket.id, uid);
-            socket.join(uid);
-            sendMsg = messages.success_auth;
+            // join socket to "room" room
+            socket.join(room);
+            message = messages.success_auth;
         }
-
-        sendInfo(socket, sendMsg);
+        
+        sendInfo({ socket, message });
     })
 
     // run when user is logout
     socket.on(config.on.logout, (data) => {
-        let sendMsg = messages.wrong_logout;
+        const { room } = data;
 
-        const { uid } = data;
-        
-        if (uid) {
-            socket.leave(uid);
-            removeRoom(uid);
-            sendMsg = proxyMessage.success_logout;
+        if (room) {
+            // make all Socket instances leave the "room"
+            io.socketsLeave(room);
+            // make all Socket instances in the "room" room disconnect (and close the low-level connection)
+            io.in(room).disconnectSockets(true);
         }
 
-        sendInfo(socket, uid, sendMsg, socket.id);
+        console.log(`user ${ socket.id } is logout`);
     })
 
     // run when user is disconnect
     socket.on(config.on.disconnect, () => {
-        removeUserSocketIdFromRoom(socket.id, uid);
-
-        if (!getRooms.length) {
-            removeRoom(uid);
-        }
+        // leave socket from "room" room
+        io.in(socket.id).socketsLeave(room);
 
         console.log(`user ${ socket.id } is disconnected`)
     })
@@ -81,6 +79,7 @@ io.use((socket, next) => {
     }
 });
 
+// start serve
 server.listen(PORT, () => {
     console.log(`server started in port ${ PORT }`)
 })
