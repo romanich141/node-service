@@ -23,11 +23,17 @@ io.on(config.on.connection, (socket) => {
     let uid = null;
     let token = null;
 
+    socket.on(config.on.test, data => {
+        console.log({ data });
+
+        sendInfo(socket, data);
+    })
+
     // run when user is auth
     socket.on(config.on.auth, (data) => {
         token = data.token;
         uid = data.uid;
-        
+       
         let sendMsg = messages.wrong_auth;
 
         if (token && verifyToken(token)) {
@@ -36,7 +42,7 @@ io.on(config.on.connection, (socket) => {
             sendMsg = messages.success_auth;
         }
 
-        sendInfo(io, sendMsg, socket.id);
+        sendInfo(socket, sendMsg);
     })
 
     // run when user is logout
@@ -51,7 +57,7 @@ io.on(config.on.connection, (socket) => {
             sendMsg = proxyMessage.success_logout;
         }
 
-        sendInfo(io, sendMsg, socket.id);
+        sendInfo(socket, uid, sendMsg, socket.id);
     })
 
     // run when user is disconnect

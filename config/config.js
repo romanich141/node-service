@@ -8,7 +8,8 @@ module.exports = {
         connection: 'connection',
         auth: 'auth',
         logout: 'logout',
-        disconnect: 'disconnect'
+        disconnect: 'disconnect',
+        test: 'test',
     },
     emit: {
         connect: 'connect',
