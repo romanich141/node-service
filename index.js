@@ -2,14 +2,29 @@ require('dotenv').config();
 const { Server } = require("socket.io");
 const http = require('http');
 const express = require('express');
-const { verifyToken } = require('./helpers/token-helper.js');
+const { verifyToken, getuserIdFromToken } = require('./helpers/token-helper.js');
 const sendInfo = require('./helpers/info-helper.js')
 const config = require('./config/config.js')
 const messages = require('./messages/index.js');
 const app = express();
 const server = http.createServer(app);
 
-const PORT = process.env.NODE_PORT;
+
+const ssl = () => {
+    if (config.ssl === "true") {
+        const https = require('https');    
+        
+        const serverHttps = https.createServer({
+            key: fs.readFileSync('./config/keys/privkey.pem'),
+            cert: fs.readFileSync('./config/keys/fullchain.pem'),
+        }, app);
+        serverHttps.listen(config.port);
+    
+        return serverHttps;
+    }
+            
+    return config.port;
+};
 
 // options socket server
 const options = {
@@ -26,16 +41,15 @@ io.on(config.on.connection, (socket) => {
     let token = null;
 
     socket.on(config.on.test, data => {
-        // console.log({ data });
-
+        
         sendInfo({ socket, message: data });
     })
 
     // run when user is auth
     socket.on(config.on.auth, (data) => {
         token = data.token;
-        room = data.room;
-
+        room = getuserIdFromToken(token);
+        
         let message = messages.wrong_auth;
 
         if (token && verifyToken(token)) {
@@ -48,8 +62,7 @@ io.on(config.on.connection, (socket) => {
     })
 
     // run when user is logout
-    socket.on(config.on.logout, (data) => {
-        const { room } = data;
+    socket.on(config.on.logout, () => {
 
         if (room) {
             // make all Socket instances leave the "room"
@@ -80,6 +93,9 @@ io.use((socket, next) => {
 });
 
 // start serve
-server.listen(PORT, () => {
-    console.log(`server started in port ${ PORT }`)
-})
+server.listen(ssl())
+
+// todo ssl //done
+// parse token //done
+// add
+// ADD TOKEN TO HEADERS
