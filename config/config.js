@@ -3,7 +3,7 @@ require('dotenv').config();
 module.exports = {
     secret_key: 'proxy',
     // ssl: process.env.SSL,
-    // port: process.env.PROXY_PORT,
+    port: process.env.NODE_PORT,
     on: {
         connection: 'connection',
         auth: 'auth',
