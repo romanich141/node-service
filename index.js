@@ -35,19 +35,18 @@ const io = new Server(server, options);
 
 // run when new user is connected
 io.on(config.on.connection, (socket) => {
-    console.log("New connection", socket.id);
-
     let room = null;
     let token = null;
-
-    socket.on(config.on.test, data => {
-        
+    
+    console.log("New connection", socket.id);
+    
+    socket.on(config.on.test, data => {        
         sendInfo({ socket, message: data });
     })
 
     // run when user is auth
-    socket.on(config.on.auth, (data) => {
-        token = data.token;
+    socket.on(config.on.auth, () => {
+        token = socket.handshake.auth.token;
         room = getuserIdFromToken(token);
         
         let message = messages.wrong_auth;
@@ -63,7 +62,6 @@ io.on(config.on.connection, (socket) => {
 
     // run when user is logout
     socket.on(config.on.logout, () => {
-
         if (room) {
             // make all Socket instances leave the "room"
             io.socketsLeave(room);
@@ -86,7 +84,12 @@ io.on(config.on.connection, (socket) => {
 // middleware
 io.use((socket, next) => {
     try {
-        next();
+        const token = socket.handshake.auth.token;
+
+        if (verifyToken(token)) {
+            next();
+        }
+        
     } catch (err) {
         return next(new Error(messages.error_server));
     }
