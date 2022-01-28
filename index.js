@@ -9,6 +9,9 @@ const messages = require('./messages/index.js');
 const app = express();
 const server = http.createServer(app);
 
+app.get("/", (req, res) => {
+    res.send(`Server is running`)
+})
 
 const ssl = () => {
     if (config.ssl === "true") {
