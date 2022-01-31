@@ -2,12 +2,13 @@ require('dotenv').config();
 
 const { 
     NODE_PORT, 
-    REDIS_DOCKER_NAME,
-    REDIS_PORT } = process.env;
+    REDIS_HOST,
+    REDIS_PORT,
+    SSL, } = process.env;
 
 module.exports = {
     secret_key: 'proxy',
-    // ssl: process.env.SSL,
+    ssl: SSL,
     port: NODE_PORT,
     on: {
         connection: 'connection',
@@ -23,7 +24,7 @@ module.exports = {
 
     redis: {
         setting: {
-            host: REDIS_DOCKER_NAME,
+            host: REDIS_HOST,
             port: REDIS_PORT,
         },
         subscriber: ['laravel_database_po_event'],

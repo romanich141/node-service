@@ -6,7 +6,7 @@ services:
       dockerfile: docker/server/Dockerfile
     volumes:
       - .:/home/server/
-    container_name: ${NODE_DOCKER_NAME}
+    container_name: nodejs
     restart: always
     ports:
       - ${HOST_PORT}:${NODE_PORT}

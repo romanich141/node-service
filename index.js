@@ -9,6 +9,7 @@ const messages = require('./messages/index.js');
 const app = express();
 const server = http.createServer(app);
 const RedisClient = require("./helpers/RedisClient.js");
+const fs = require("fs");
 
 let redis;
 
