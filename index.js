@@ -8,10 +8,47 @@ const config = require('./config/config.js')
 const messages = require('./messages/index.js');
 const app = express();
 const server = http.createServer(app);
+const RedisClient = require("./helpers/RedisClient.js");
 
-app.get("/", (req, res) => {
-    res.send(`Server is running`)
-})
+let redis;
+
+// create redis lint and connecting to redis
+const connectToRedis = async () => {    
+    try {
+        redis = new RedisClient(config.redis.setting) 
+        redis.createClient();
+        
+        await redis.connect();
+    } catch (error) {
+        throw error;
+    }
+}
+
+// redis subscribe
+const redisSubscriber = async (client) => {
+    try {
+        await client.subscribe(config.redis.subscriber, (data) => {
+            const parseData = JSON.parse(data) || {};
+            const { uid, method, } = parseData.data;
+            const room = uid;
+
+            if (method === config.redis.event) {
+                io.to(room).emit(method, parseData.data);
+            }
+
+            console.log(data)
+        });
+    } catch (error) {
+       throw error; 
+    }
+}
+
+const startRedis = async () => {
+    await connectToRedis()
+    await redisSubscriber(redis);
+}
+
+startRedis();
 
 const ssl = () => {
     if (config.ssl === "true") {
@@ -100,8 +137,3 @@ io.use((socket, next) => {
 
 // start serve
 server.listen(ssl())
-
-// todo ssl //done
-// parse token //done
-// add
-// ADD TOKEN TO HEADERS
