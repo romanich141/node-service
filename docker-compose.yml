@@ -9,7 +9,7 @@ services:
     container_name: ${NODE_DOCKER_NAME}
     restart: always
     ports:
-      - "3434:3434"
+      - ${HOST_PORT}:${NODE_PORT}
 networks:
   default:
     external:
