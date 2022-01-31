@@ -3,10 +3,14 @@ version: '3'
 services:
   nodejs:
     build:
-      dockerfile: docker/Dockerfile
+      dockerfile: docker/server/Dockerfile
     volumes:
       - .:/home/server/
-    container_name: nodejs
+    container_name: ${NODE_DOCKER_NAME}
     restart: always
     ports:
       - "3434:3434"
+networks:
+  default:
+    external:
+      name: stock_network
