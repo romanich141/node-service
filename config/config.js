@@ -1,7 +1,7 @@
 require('dotenv').config();
 
 const { 
-    NODE_PORT, 
+    HOST_PORT, 
     REDIS_HOST,
     REDIS_PORT,
     SSL, } = process.env;
@@ -9,7 +9,7 @@ const {
 module.exports = {
     secret_key: 'proxy',
     ssl: SSL,
-    port: NODE_PORT,
+    port: HOST_PORT,
     on: {
         connection: 'connection',
         auth: 'auth',
