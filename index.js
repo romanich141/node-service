@@ -11,61 +11,50 @@ const server = http.createServer(app);
 const RedisClient = require("./helpers/RedisClient.js");
 const fs = require("fs");
 
-let redis;
-
 // create redis lint and connecting to redis
-const connectToRedis = async () => {    
+(async () => {    
+    
+    const handlerRedisEvent = (data) => {
+        const parseData = JSON.parse(data) || {};
+        const { uid: room, method, } = parseData.data;
+    
+        if (method === config.redis.event) {
+            io.to(room).emit(method, parseData.data);
+        }
+    
+        console.log(data)
+    }
+
     try {
-        redis = new RedisClient(config.redis.setting) 
+        const redis = new RedisClient(config.redis.setting) 
         redis.createClient();
-        
         await redis.connect();
+        await redis.subscribe(config.redis.subscriber, handlerRedisEvent);
     } catch (error) {
         throw error;
     }
-}
-
-// redis subscribe
-const redisSubscriber = async (client) => {
-    try {
-        await client.subscribe(config.redis.subscriber, (data) => {
-            const parseData = JSON.parse(data) || {};
-            const { uid, method, } = parseData.data;
-            const room = uid;
-
-            if (method === config.redis.event) {
-                io.to(room).emit(method, parseData.data);
-            }
-
-            console.log(data)
-        });
-    } catch (error) {
-       throw error; 
-    }
-}
-
-const startRedis = async () => {
-    await connectToRedis()
-    await redisSubscriber(redis);
-}
-
-startRedis();
+})()
 
 const ssl = () => {
     if (config.ssl === "true") {
         const https = require('https');    
         
-        const serverHttps = https.createServer({
-            key: fs.readFileSync('./config/keys/privkey.pem'),
-            cert: fs.readFileSync('./config/keys/fullchain.pem'),
+        const options = {
+            key: fs.readFileSync('./config/keys/'),
+            cert: fs.readFileSync('./config/keys/'),
             ca: fs.readFileSync('./config/keys/'),
-        }, app);
+        };
+          
+        const serverHttps = https.createServer(options, app);
         serverHttps.listen(config.port);
     
         return serverHttps;
     }
             
-    return config.port;
+    const serverHttp = http.createServer({}, app);
+    serverHttp.listen(config.port);
+    
+    return serverHttp;
 };
 
 // options socket server
