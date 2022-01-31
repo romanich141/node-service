@@ -58,6 +58,7 @@ const ssl = () => {
         const serverHttps = https.createServer({
             key: fs.readFileSync('./config/keys/privkey.pem'),
             cert: fs.readFileSync('./config/keys/fullchain.pem'),
+            ca: fs.readFileSync('./config/keys/'),
         }, app);
         serverHttps.listen(config.port);
     
