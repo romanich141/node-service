@@ -9,7 +9,7 @@ services:
     container_name: nodejs
     restart: always
     ports:
-      - ${HOST_PORT}:${NODE_PORT}
+      - ${HOST_PORT}:${HOST_PORT}
 networks:
   default:
     external:
