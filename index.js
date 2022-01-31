@@ -80,10 +80,6 @@ io.on(config.on.connection, (socket) => {
     
     console.log("New connection", socket.id);
     
-    socket.on(config.on.test, data => {        
-        sendInfo({ socket, message: data });
-    })
-
     // run when user is auth
     socket.on(config.on.auth, () => {
         token = socket.handshake.auth.token;
