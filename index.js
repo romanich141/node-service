@@ -7,7 +7,6 @@ const sendInfo = require('./helpers/info-helper.js')
 const config = require('./config/config.js')
 const messages = require('./messages/index.js');
 const app = express();
-const server = http.createServer(app);
 const RedisClient = require("./helpers/RedisClient.js");
 const fs = require("fs");
 
@@ -40,9 +39,9 @@ const ssl = () => {
         const https = require('https');    
         
         const options = {
-            key: fs.readFileSync('./config/keys/'),
-            cert: fs.readFileSync('./config/keys/'),
-            ca: fs.readFileSync('./config/keys/'),
+            key:   fs.readFileSync('./config/keys/2200199937-00.pem'),
+            cert:  fs.readFileSync('./config/keys/websocket_gerchikco_com.crt'),
+            ca:  fs.readFileSync('./config/keys/websocket_gerchikco_com.ca-bundle'),
         };
           
         const serverHttps = https.createServer(options, app);
@@ -62,7 +61,7 @@ const options = {
     transports: ["websocket"]
 };
 
-const io = new Server(server, options);
+const io = new Server(ssl(), options);
 
 // run when new user is connected
 io.on(config.on.connection, (socket) => {
@@ -121,6 +120,3 @@ io.use((socket, next) => {
         return next(new Error(messages.error_server));
     }
 });
-
-// start serve
-server.listen(ssl())

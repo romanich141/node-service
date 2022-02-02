@@ -1,15 +1,14 @@
-version: '3'
+version: '3.0'
 
 services:
   nodejs:
-    build:
-      dockerfile: docker/server/Dockerfile
+    build: ./
     volumes:
-      - .:/home/server/
+      - './:/var/www/html'
     container_name: nodejs
     restart: always
     ports:
-      - ${HOST_PORT}:${HOST_PORT}
+      - "${DOCKER_PORT}:${DOCKER_PORT}"
 networks:
   default:
     external:
